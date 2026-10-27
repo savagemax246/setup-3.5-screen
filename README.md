@@ -174,7 +174,7 @@ Please include:
 
 ## License
 
-Add your chosen open-source license in the `LICENSE` file before distributing the project.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
