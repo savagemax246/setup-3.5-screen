@@ -93,7 +93,7 @@ To restore the most recent `config.txt` backup:
 bash setup-3.5-screen.sh --undo
 ```
 
-**Note:** The current undo implementation restores `config.txt`, but does not yet restore a modified `cmdline.txt`.
+**Note:** Undo restores `config.txt` and, when a matching backup exists, `cmdline.txt` (removing `fbcon=map:1`).
 
 ## Verify the display
 

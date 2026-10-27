@@ -9,6 +9,7 @@
 #   bash setup-3.5-screen.sh --fbcon    install + force the text console onto the screen
 #                                       (only needed if the screen stays blank after reboot)
 #   bash setup-3.5-screen.sh --undo     restore the most recent config backup
+#                                       (and the matching cmdline.txt backup, if any)
 set -euo pipefail
 
 if [ "$(id -u)" -eq 0 ]; then
@@ -23,6 +24,14 @@ CMD=/boot/firmware/cmdline.txt
 [ -f "$CFG" ] || { echo "Can't find config.txt"; exit 1; }
 
 MODE="${1:-install}"
+case "$MODE" in
+  install|--fbcon|--undo) ;;
+  *)
+    echo "Unknown option: $MODE"
+    echo "Usage: bash setup-3.5-screen.sh [--fbcon|--undo]"
+    exit 1
+    ;;
+esac
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 ask_reboot() {
@@ -35,6 +44,16 @@ if [ "$MODE" = "--undo" ]; then
   [ -n "$BACKUP" ] || { echo "No backup found next to $CFG."; exit 1; }
   sudo cp "$BACKUP" "$CFG"
   echo "Restored $BACKUP"
+  # --fbcon backs up cmdline.txt with the same timestamp stamp as config.txt,
+  # so undo can restore the matching cmdline backup and remove fbcon=map:1.
+  STAMP_FROM_BACKUP="${BACKUP##*.bak-screen-}"
+  CMD_BACKUP="$CMD.bak-screen-$STAMP_FROM_BACKUP"
+  if [ -f "$CMD_BACKUP" ]; then
+    sudo cp "$CMD_BACKUP" "$CMD"
+    echo "Restored $CMD_BACKUP"
+  else
+    echo "No matching cmdline.txt backup found; cmdline.txt left unchanged."
+  fi
   ask_reboot
   exit 0
 fi
